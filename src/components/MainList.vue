@@ -1,27 +1,26 @@
-<!-- ;==========================================
-; Title:  Signature Collector
-; Author: Marcel Matschke
-; Date:   05.08.2022
-;========================================== -->
-
 <template>
     <div>
         <v-container >
+
             <h1 style="color: #e3eaff" class="mb-4">Signature Collector</h1>
+
             <div class="row" v-for="(input, index) in inputs" :key="index" >
-                <v-text-field style="color: #e3eaff"
+
+                <v-text-field
+                style="color: #e3eaff"
                 v-model="input.name"
                 :counter="50"
                 :rules="nameRules"
                 label="Name"
-                required
                 prepend-icon="mdi-trash-can-outline"
                 append-icon="mdi-pencil-outline"
                 @click:prepend="deleteRow(index)"
                 @click:append="edit(index)">
                 </v-text-field>
+
                 <v-row class="signature" style="outline-color: black; outline-style: solid; outline-width: 1px; margin-bottom: 12px" :id="'sigDiv_' + index">
                     <v-container>
+                        <!-- Signaturepad -->
                         <VueSignaturePad style="background-color: #e3eaff;"
                         :id="'signaturePad_' + index"
                         width="98%"
@@ -30,24 +29,26 @@
                         :options="options"
                         />
 
+                        <!-- Funktionsbuttons -->
                         <div>
                             <div class="pr-4" style="; display: flex; gap: 0.5rem;">
-                                <button class="buttons" style="color: #e3eaff" @click="change(`signaturePad_${index}`, 'black')">schwarz</button>
-                                <button class="buttons" style="color: #e3eaff" @click="change(`signaturePad_${index}`, 'blue')">blau</button>
+                                <button class="buttons" style="color: #e3eaff" @click="change('black')">schwarz</button>
+                                <button class="buttons" style="color: #e3eaff" @click="change('blue')">blau</button>
                                 <v-spacer></v-spacer>
-                                <button class="buttons" style="color: #e3eaff;justify-content: end;" @click="undo(`signaturePad_${index}`)">Undo</button>
+                                <button class="buttons" style="color: #e3eaff;justify-content: end;" @click="clear(`signaturePad_${index}`)">Löschen</button>
+                                <button class="buttons" style="color: #e3eaff;justify-content: end;" @click="undo(`signaturePad_${index}`)">rückgängig</button>
                                 <button class="buttons" style="color: #e3eaff;justify-content: end;" @click="save(`signaturePad_${index}`,index)">Speichern</button>
                             </div>
                         </div>
-                        
+
                     </v-container>
                 </v-row>
-                
-                
+
             </div>
 
             <!-- Hauptbuttons -->
             <v-row class="d-flex justify-center align-baseline py-3" style="gap: 1rem">
+
                 <v-btn
                 style="background-color: #e3eaff"
                 prepend-icon="mdi-cloud-upload"
@@ -55,11 +56,13 @@
                 >
                 Signatur hinzufügen
                 </v-btn>
+
                 <v-btn  @click="exportAsJSON"
                     style="background-color: #e3eaff"
                     prepend-icon="mdi-cloud-download-outline"
                 >JSON downloaden
                 </v-btn>
+
             </v-row>
 
         </v-container>
@@ -67,6 +70,7 @@
 </template>
 
 <script>
+import { useToast } from "vue-toastification";
 class DataDownloader {
     constructor(data={}) {
         this.data = data;
@@ -84,12 +88,15 @@ class DataDownloader {
         window.URL.revokeObjectURL(a.href)
     }
 }
+const toast = useToast();
+
 export default {
     data: () => ({
         inputs: [],
-        // options: {
-        //     penColor: "#c0f",
-        // },
+
+        options: {
+            penColor: "#000000",
+        },
     }),
     mounted: function() {
         this.inputs.push({
@@ -108,7 +115,6 @@ export default {
       this.inputs.splice(index,1)
     },
     edit(index){
-        console.log(index);
         if(document.getElementById('sigDiv_'+index).style.display === "none"){
             document.getElementById('sigDiv_'+index).style.display = "flex";
         }
@@ -119,51 +125,62 @@ export default {
     save(ref,index) {
         const { isEmpty, data } = this.$refs[ref][0].saveSignature();
         if(isEmpty) {
-            alert("Unterschrift ist leer");
+            toast.error("Unterschrift ist leer");
         } else if(this.inputs[index].name == "") {
-            alert("Name ist leer");
+            toast.error("Name ist leer");
         }else {
-            this.inputs[index].signature = data;
+            var base64result = data.split(',')[1];
+            this.inputs[index].signature = base64result;
             document.getElementById('sigDiv_'+index).style.display = "none";
-            console.log(data);
+            toast.success("Unterschrift gespeichert für " + this.inputs[index].name );
         }
     },
-    change(ref, color) {
-        console.log(this.$refs[ref][0].options)
-        let colorToUse = "#00f";
+    clear(ref, index) {
+        this.$refs[ref][0].clearSignature();
+    },
+    change(color) {
+        let colorToUse = "";
         if(color == 'black') {
-            colorToUse = "#00f";
+            colorToUse = "#000000";
         } else if (color == 'blue') {
-            colorToUse = "#c0f";
+            colorToUse = "#0008ff";
         }
-        this.$refs[ref][0].options.pencolor = "blue"
-      
-    },
-    resume() {
-      this.options = {
-        penColor: "#c0f",
-      };
-    },
-    onBegin() {
-      console.log('=== Begin ===');
-    },
-    onEnd() {
-      console.log('=== End ===');
+        this.options = {
+            penColor: colorToUse,
+        }
     },
     exportAsJSON() {
         for (let index = 0; index < this.inputs.length; index++) {
             const element = this.inputs[index];
             if(element.name == ""){
-                alert("Name eintragen");
+                toast.error("Name ist leer");
                 return;
             }
             if(document.getElementById('sigDiv_'+index).style.display !== "none"){
-                alert("Bitte die Unterschrift speichern");
+                toast.error("Bitte die Unterschrift/n speichern");
                 return;
             }
         }
         new DataDownloader(this.inputs).download();
-    }
+    },
+    computed: {
+      color: {
+        get () {
+          return this[this.type]
+        },
+        set (v) {
+          this[this.type] = v
+        },
+      },
+      showColor () {
+        if (typeof this.color === 'string') return this.color
+
+        return JSON.stringify(Object.keys(this.color).reduce((color, key) => {
+          color[key] = Number(this.color[key].toFixed(2))
+          return color
+        }, {}), null, 2)
+      },
+    },
   }
 }
 </script>

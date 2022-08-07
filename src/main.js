@@ -4,9 +4,18 @@ import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
 import VueSignaturePad from 'vue-signature-pad';
 
+import Toast from "vue-toastification";
+// Import the CSS or use your own!
+import "vue-toastification/dist/index.css";
+
 loadFonts()
+
+const options = {
+    // You can set your default options here
+};
 
 createApp(App)
     .use(vuetify)
     .use(VueSignaturePad)
+    .use(Toast, options)
     .mount('#app')
