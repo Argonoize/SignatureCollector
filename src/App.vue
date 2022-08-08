@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-main style="background-color: #202124;">
+    <v-main style="background-color: rgb(50, 50, 50);">
       <MainList/>
     </v-main>
   </v-app>

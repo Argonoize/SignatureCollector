@@ -210,6 +210,6 @@ export default {
     .color-input.user .box.active {
         width: 36px !important;
         height: 36px !important;
-        background: rgb(32 33 36);
+        background: rgb(50, 50, 50);
     }
 </style>
