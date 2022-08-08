@@ -45,9 +45,16 @@
             </div>
 
             <!-- Hauptbuttons -->
+
+            <v-row class="d-flex justify-center align-baseline py-3">
+                 <v-col cols="3" style="color: rgb(227, 234, 255);">
+                    <v-subheader>Stiftfarbe wählen</v-subheader>
+                </v-col>
+                <color-input class="customcolor" v-model="color" @change="colorPickEnd()" ref="colorInput" format="hex8" disable-alpha="true" disable-text-inputs="true"/>
+            </v-row>
             <v-row class="d-flex justify-center align-baseline py-3" style="gap: 1rem">
 
-                <color-input class="customcolor" v-model="color" @change="colorPickEnd()" ref="colorInput" format="hex8" disable-alpha="true" disable-text-inputs="true" position="right"/>
+                
                 
                 <v-btn
                 style="background-color: #e3eaff"
