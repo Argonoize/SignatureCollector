@@ -31,9 +31,7 @@
 
                         <!-- Funktionsbuttons -->
                         <div>
-                            <div class="pr-4" style="; display: flex; gap: 0.5rem;">
-                                <button class="buttons" style="color: #e3eaff" @click="change('black')">schwarz</button>
-                                <button class="buttons" style="color: #e3eaff" @click="change('blue')">blau</button>
+                            <div class="pr-4 pt-3" style="; display: flex; gap: 0.5rem;">
                                 <v-spacer></v-spacer>
                                 <button class="buttons" style="color: #e3eaff;justify-content: end;" @click="clear(`signaturePad_${index}`)">Löschen</button>
                                 <button class="buttons" style="color: #e3eaff;justify-content: end;" @click="undo(`signaturePad_${index}`)">rückgängig</button>
@@ -49,12 +47,13 @@
             <!-- Hauptbuttons -->
             <v-row class="d-flex justify-center align-baseline py-3" style="gap: 1rem">
 
+                <color-input class="customcolor" v-model="color" @change="colorPickEnd()" ref="colorInput" format="hex8" disable-alpha="true" disable-text-inputs="true" position="right"/>
+                
                 <v-btn
                 style="background-color: #e3eaff"
                 prepend-icon="mdi-cloud-upload"
                 @click="addRow"
-                >
-                Signatur hinzufügen
+                >Signatur hinzufügen
                 </v-btn>
 
                 <v-btn  @click="exportAsJSON"
@@ -71,6 +70,7 @@
 
 <script>
 import { useToast } from "vue-toastification";
+
 class DataDownloader {
     constructor(data={}) {
         this.data = data;
@@ -93,10 +93,11 @@ const toast = useToast();
 export default {
     data: () => ({
         inputs: [],
-
+        
         options: {
             penColor: "#000000",
         },
+        color: "#000",
     }),
     mounted: function() {
         this.inputs.push({
@@ -138,17 +139,6 @@ export default {
     clear(ref, index) {
         this.$refs[ref][0].clearSignature();
     },
-    change(color) {
-        let colorToUse = "";
-        if(color == 'black') {
-            colorToUse = "#000000";
-        } else if (color == 'blue') {
-            colorToUse = "#0008ff";
-        }
-        this.options = {
-            penColor: colorToUse,
-        }
-    },
     exportAsJSON() {
         for (let index = 0; index < this.inputs.length; index++) {
             const element = this.inputs[index];
@@ -163,45 +153,56 @@ export default {
         }
         new DataDownloader(this.inputs).download();
     },
-    computed: {
-      color: {
-        get () {
-          return this[this.type]
-        },
-        set (v) {
-          this[this.type] = v
-        },
-      },
-      showColor () {
-        if (typeof this.color === 'string') return this.color
+    colorPickEnd() {
+        const colorInput = this.$refs.colorInput
 
-        return JSON.stringify(Object.keys(this.color).reduce((color, key) => {
-          color[key] = Number(this.color[key].toFixed(2))
-          return color
-        }, {}), null, 2)
-      },
-    },
+        this.options = {
+            penColor: "#"+colorInput.color.toHex(),
+        }
+    }
   }
 }
 </script>
 
 <style scope>
     .signature {
-    border: double 3px transparent;
-    border-radius: 5px;
-    background-origin: border-box;
-    background-clip: content-box, border-box;
+        border: double 3px transparent;
+        border-radius: 5px;
+        background-origin: border-box;
+        background-clip: content-box, border-box;
     }
 
     .container {
-    width: "100%";
-    padding: 8px 16px;
+        width: "100%";
+        padding: 8px 16px;
     }
 
     .buttons {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
     }
 
+    .color-input.user {
+        width: 36px !important;
+        height: 36px !important;
+        align-self: center;
+    }
+
+    .color-input.user .color {
+        width: 36px !important;
+        height: 36px !important;
+        
+    }
+
+    .color-input.user .transparent {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .color-input.user .box.active {
+        width: 36px !important;
+        height: 36px !important;
+        background: rgb(32 33 36);
+    }
 </style>
