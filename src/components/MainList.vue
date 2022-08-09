@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-container style="max-width: 900px">
+        <v-container>
             <h1 style="color: #e3eaff" class="">Signature Collector</h1>
             <div class="row mt-5" v-for="(input, index) in inputs" :key="index">
                 <!-- Namenseingabe -->
