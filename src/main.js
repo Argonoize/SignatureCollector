@@ -4,6 +4,9 @@ import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
 import VueSignaturePad from 'vue-signature-pad';
 import ColorInput from 'vue-color-input'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
 
 import Toast from "vue-toastification";
 // Import the CSS or use your own!
@@ -20,4 +23,5 @@ createApp(App)
     .use(VueSignaturePad)
     .use(Toast, options)
     .use(ColorInput)
+    .use(VueAxios, axios)
     .mount('#app')

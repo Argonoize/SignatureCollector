@@ -30,12 +30,26 @@
                 <color-input class="customcolor" v-model="color" @change="colorPickEnd()" ref="colorInput" format="hex8" disable-alpha="true" />
                 <!-- disable-text-inputs="true" -->
             </v-row>
+             <div v-show="isActive">
+                <v-form ref="form" v-model="valid" lazy-validation>
+                    <v-row class="d-flex justify-center align-baseline py-3 "  style="gap: 1rem">
+                        <v-text-field style="color: #e3eaff" v-model="email" :rules="emailRules" label="E-mail" required prepend-icon="mdi-email">
+                        </v-text-field>
+                        <v-btn @click="sendEmail" style="background-color: #e3eaff" prepend-icon="mdi-email" :disabled="!valid">absenden
+                        </v-btn>
+                    </v-row>
+                </v-form>
+            </div >
             <v-row class="d-flex justify-center align-baseline py-3" style="gap: 1rem">
                 <v-btn style="background-color: #e3eaff" prepend-icon="mdi-cloud-upload" @click="addRow">Signatur hinzufügen
                 </v-btn>
                 <v-btn @click="exportAsJSON" style="background-color: #e3eaff" prepend-icon="mdi-cloud-download-outline">JSON downloaden
                 </v-btn>
+                <v-btn @click="exportAsEmail" style="background-color: #e3eaff" prepend-icon="mdi-email">Email versenden
+                </v-btn>
             </v-row>
+           
+            
         </v-container>
     </div>
 </template>
@@ -69,6 +83,13 @@
                 penColor: "#000000",
             },
             color: "#000",
+            isActive: false,
+            valid: false,
+            email: '',
+            emailRules: [
+                v => !!v || 'E-mail ist Pflicht',
+                v => /.+@.+\..+/.test(v) || 'Es muss eine gültige E-mail eingegeben werden',
+            ],
         }),
         mounted: function() {
             this.inputs.push({
@@ -126,6 +147,35 @@
                     }
                 }
                 new DataDownloader(this.inputs).download();
+            },
+            exportAsEmail() {
+                this.isActive = !this.isActive;
+            },
+            sendEmail() {
+                for (let index = 0; index < this.inputs.length; index++) {
+                    const element = this.inputs[index];
+                    if (element.name == "") {
+                        toast.error("Name ist leer");
+                        return;
+                    }
+                    if (document.getElementById('sigDiv_' + index).style.display !== "none") {
+                        toast.error("Bitte die Unterschrift/n speichern");
+                        return;
+                    }
+                }
+
+                this.axios.post('API URL', { input: this.inputs, email: this.email })
+                .then((res) => {
+                    if(res.data.success) {
+                        toast.success("Email versendet. Die Seite wird in 5 Sekunden neu geladen.");
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 5000);
+                    }
+                    if(res.data.error) {
+                        toast.error("Fehler beim Emailversand");
+                    }
+                })
             },
             colorPickEnd() {
                 const colorInput = this.$refs.colorInput
