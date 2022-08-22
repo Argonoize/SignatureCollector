@@ -9,7 +9,7 @@
                 <v-row class="signature" style="outline-color: black; outline-style: solid; outline-width: 1px; margin-bottom: 12px" :id="'sigDiv_' + index">
                     <v-container>
                         <!-- Signaturepad -->
-                        <VueSignaturePad style="background-color: #e3eaff;" :id="'signaturePad_' + index" width="98%" height="200px" :ref="'signaturePad_' + index" :options="options" />
+                        <VueSignaturePad style="background-color: #e3eaff;" :id="'signaturePad_' + index" width="98%" height="200px" :ref="'signaturePad_' + index" :options="{options, onBegin}" />
                         <!-- Funktionsbuttons -->
                         <div>
                             <div class="pr-4 pt-3" style="; display: flex; gap: 0.5rem;">
@@ -95,7 +95,7 @@
             this.inputs.push({
                 name: '',
                 signature: ''
-            })
+            });
         },
         methods: {
             addRow() {
@@ -181,6 +181,11 @@
                 const colorInput = this.$refs.colorInput
                 this.options = {
                     penColor: "#" + colorInput.color.toHex(),
+                }
+            },
+            onBegin() {
+                if(event.target.parentElement.id === "signaturePad_0"){
+                    this.$refs.signaturePad_0[0].resizeCanvas();
                 }
             }
         }
